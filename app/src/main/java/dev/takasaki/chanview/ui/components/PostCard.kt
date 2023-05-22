@@ -1,8 +1,11 @@
 package dev.takasaki.chanview.ui.components
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,12 +25,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import coil.compose.AsyncImage
 import dev.takasaki.chanview.R
 import dev.takasaki.chanview.core.dtos.Post
@@ -35,6 +40,7 @@ import dev.takasaki.chanview.ui.theme.AppTheme
 
 @Composable
 fun PostCard(post: Post, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     var isCropped by remember {
         mutableStateOf(true)
     }
@@ -75,7 +81,8 @@ fun PostCard(post: Post, modifier: Modifier = Modifier) {
             }
             Column(
                 Modifier
-                    .padding(8.dp)) {
+                    .padding(8.dp)
+            ) {
                 if (post.comment != null) {
                     Surface(shape = RoundedCornerShape(15.dp), modifier = Modifier.fillMaxWidth()) {
                         Text(
@@ -90,12 +97,27 @@ fun PostCard(post: Post, modifier: Modifier = Modifier) {
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                 }
-                Text(
-                    text = post.createdAt,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Light,
-                    modifier = Modifier.align(Alignment.End)
-                )
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Share", fontSize = 10.sp,
+                        fontWeight = FontWeight.Light, modifier = Modifier.clickable {
+                            val sendIntent: Intent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, post.postUrl)
+                                type = "text/plain"
+                            }
+
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            startActivity(context, shareIntent, null)
+                        })
+                    Text(
+                        text = post.createdAt,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Light,
+                    )
+                }
             }
         }
     }
@@ -104,7 +126,7 @@ fun PostCard(post: Post, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 private fun PostCardPreview() {
-    val post = Post("12/31/18(Mon)17:05:48", LoremIpsum(500).values.first(), null)
+    val post = Post("12/31/18(Mon)17:05:48", LoremIpsum(500).values.first(), null, "")
     AppTheme(true) {
         PostCard(post)
     }

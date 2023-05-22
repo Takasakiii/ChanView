@@ -41,9 +41,9 @@ fun MainScreen(modifier: Modifier = Modifier, posts: List<Post> = listOf()) {
 @Composable
 private fun MainScreenPreview() {
     val sample = listOf(
-        Post("12/31/18(Mon)17:05:48", LoremIpsum(500).values.first(), null),
-        Post("12/31/18(Mon)17:05:48", LoremIpsum(500).values.first(), null),
-        Post("12/31/18(Mon)17:05:48", LoremIpsum(500).values.first(), null)
+        Post("12/31/18(Mon)17:05:48", LoremIpsum(500).values.first(), null, ""),
+        Post("12/31/18(Mon)17:05:48", LoremIpsum(500).values.first(), null, ""),
+        Post("12/31/18(Mon)17:05:48", LoremIpsum(500).values.first(), null, "")
     )
 
     MainScreen(posts = sample)

@@ -5,5 +5,6 @@ import android.net.Uri
 data class Post(
     val createdAt: String,
     val comment: String?,
-    val image: Uri?
+    val image: Uri?,
+    val postUrl: String
 )

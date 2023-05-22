@@ -66,7 +66,7 @@ object ChanService {
                                     if (thread.tim != null)
                                         Uri.parse("https://i.4cdn.org/${board.board}/${thread.tim}${thread.ext}")
                                     else
-                                        null
+                                        null, "https://boards.4chan.org/${board.board}/thread/${thread.no}"
                                 )
                                 posts.add(post)
                             }
