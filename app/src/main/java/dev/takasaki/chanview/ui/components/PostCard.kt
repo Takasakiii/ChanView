@@ -1,6 +1,7 @@
 package dev.takasaki.chanview.ui.components
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,11 +34,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import dev.takasaki.chanview.R
 import dev.takasaki.chanview.core.dtos.Post
+import dev.takasaki.chanview.core.services.ChanService
 import dev.takasaki.chanview.ui.theme.AppTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun PostCard(post: Post, modifier: Modifier = Modifier) {
@@ -44,6 +48,7 @@ fun PostCard(post: Post, modifier: Modifier = Modifier) {
     var isCropped by remember {
         mutableStateOf(true)
     }
+    val scope = rememberCoroutineScope()
 
     Card(modifier) {
         Column {
@@ -101,8 +106,8 @@ fun PostCard(post: Post, modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Share", fontSize = 10.sp,
-                        fontWeight = FontWeight.Light, modifier = Modifier.clickable {
+                    Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                        CardSmallButton("Share", onClick = {
                             val sendIntent: Intent = Intent().apply {
                                 action = Intent.ACTION_SEND
                                 putExtra(Intent.EXTRA_TEXT, post.postUrl)
@@ -110,8 +115,27 @@ fun PostCard(post: Post, modifier: Modifier = Modifier) {
                             }
 
                             val shareIntent = Intent.createChooser(sendIntent, null)
-                            startActivity(context, shareIntent, null)
+                            ContextCompat.startActivity(context, shareIntent, null)
                         })
+                        CardSmallButton(text = "Share Raw", onClick = {
+                            scope.launch {
+                                val imageUri = ChanService.getImageAndroidUri(post, context)
+                                val shareIntent: Intent = Intent().apply {
+                                    action = Intent.ACTION_SEND
+                                    putExtra(Intent.EXTRA_STREAM, imageUri)
+                                    type = "image/*"
+                                }
+
+                                ContextCompat.startActivity(context, shareIntent, null)
+                            }
+                        })
+                        CardSmallButton(text = "Save", onClick = {
+                            scope.launch {
+                                val file = ChanService.saveRawImage(post)
+                                Toast.makeText(context, "Imagem salva ${file.name}", Toast.LENGTH_SHORT).show()
+                            }
+                        })
+                    }
                     Text(
                         text = post.createdAt,
                         fontSize = 10.sp,
